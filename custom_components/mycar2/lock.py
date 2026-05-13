@@ -32,7 +32,11 @@ class MyCar2Lock(MyCar2Entity, LockEntity):
     def _status_lock(self) -> bool | None:
         if not self.coordinator.data:
             return None
-        return self.coordinator.data.get("status", {}).get("Status_Lock")
+        raw = self.coordinator.data.get("status", {}).get("Status_Lock")
+        if raw is None:
+            return None
+        # MyCar2 API: Status_Lock=True means the unlock signal is active (doors unlocked).
+        return not bool(raw)
 
     def _handle_coordinator_update(self) -> None:
         """Sync real state from coordinator; clears any optimistic value."""
