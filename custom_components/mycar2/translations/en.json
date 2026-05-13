@@ -1,0 +1,64 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MyCar2 — Sign In",
+        "description": "Enter your MyCar2 credentials.",
+        "data": {
+          "username": "Email",
+          "password": "Password"
+        }
+      },
+      "vehicle": {
+        "title": "MyCar2 — Select Vehicle",
+        "description": "Choose the vehicle to connect.",
+        "data": {
+          "vehicle_id": "Vehicle"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid credentials.",
+      "cannot_connect": "Unable to reach the MyCar2 server.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This vehicle is already configured."
+    }
+  },
+  "entity": {
+    "lock": {
+      "doors_lock": {
+        "name": "Doors"
+      }
+    },
+    "binary_sensor": {
+      "engine": { "name": "Engine" },
+      "ignition": { "name": "Ignition" },
+      "trunk": { "name": "Trunk" },
+      "hood": { "name": "Hood" },
+      "doors_open": { "name": "Doors" },
+      "offline": { "name": "Offline" }
+    },
+    "sensor": {
+      "battery": { "name": "Battery" },
+      "gps_speed": { "name": "GPS Speed" },
+      "signal": { "name": "Signal" },
+      "interior_temperature": { "name": "Interior Temperature" },
+      "firmware": { "name": "Firmware Version" }
+    },
+    "button": {
+      "start": { "name": "Remote Start" },
+      "stop": { "name": "Remote Stop" },
+      "extend": { "name": "Extend Runtime" },
+      "trunk_release": { "name": "Trunk Release" },
+      "panic_on": { "name": "Panic ON" },
+      "panic_off": { "name": "Panic OFF" },
+      "valet": { "name": "Valet Mode" },
+      "refresh": { "name": "Sync Status" }
+    },
+    "device_tracker": {
+      "tracker": { "name": "Location" }
+    }
+  }
+}

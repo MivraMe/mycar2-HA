@@ -1,0 +1,64 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MyCar2 — Connexion",
+        "description": "Entrez vos identifiants MyCar2.",
+        "data": {
+          "username": "Courriel",
+          "password": "Mot de passe"
+        }
+      },
+      "vehicle": {
+        "title": "MyCar2 — Sélection du véhicule",
+        "description": "Choisissez le véhicule à connecter.",
+        "data": {
+          "vehicle_id": "Véhicule"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Identifiants invalides.",
+      "cannot_connect": "Impossible de contacter le serveur MyCar2.",
+      "unknown": "Erreur inconnue."
+    },
+    "abort": {
+      "already_configured": "Ce véhicule est déjà configuré."
+    }
+  },
+  "entity": {
+    "lock": {
+      "doors_lock": {
+        "name": "Portes"
+      }
+    },
+    "binary_sensor": {
+      "engine": { "name": "Moteur" },
+      "ignition": { "name": "Contact" },
+      "trunk": { "name": "Coffre" },
+      "hood": { "name": "Capot" },
+      "doors_open": { "name": "Portes" },
+      "offline": { "name": "Hors ligne" }
+    },
+    "sensor": {
+      "battery": { "name": "Batterie" },
+      "gps_speed": { "name": "Vitesse GPS" },
+      "signal": { "name": "Signal" },
+      "interior_temperature": { "name": "Température habitacle" },
+      "firmware": { "name": "Version firmware" }
+    },
+    "button": {
+      "start": { "name": "Démarrage distant" },
+      "stop": { "name": "Arrêt distant" },
+      "extend": { "name": "Prolonger durée" },
+      "trunk_release": { "name": "Ouvrir coffre" },
+      "panic_on": { "name": "Panic ON" },
+      "panic_off": { "name": "Panic OFF" },
+      "valet": { "name": "Mode voiturier" },
+      "refresh": { "name": "Synchroniser" }
+    },
+    "device_tracker": {
+      "tracker": { "name": "Position" }
+    }
+  }
+}
