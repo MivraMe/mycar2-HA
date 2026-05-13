@@ -1,16 +1,20 @@
 import asyncio
 import logging
 from datetime import timedelta
+from time import monotonic
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import MyCar2ApiClient
-from .const import API_BASE_URL, CMD_REFRESH_RS, DOMAIN, KEYFOB_SYNC_INTERVAL, POLL_INTERVAL
+from .const import API_BASE_URL, CMD_AWAKE, CMD_REFRESH_RS, DOMAIN, KEYFOB_SYNC_INTERVAL, POLL_INTERVAL
 from .signalr import SignalRClient
 
 _LOGGER = logging.getLogger(__name__)
+
+# Minimum seconds between automatic wake commands to avoid spamming the device.
+_AUTO_WAKE_COOLDOWN = 120
 
 
 class MyCar2Coordinator(DataUpdateCoordinator):
@@ -32,6 +36,7 @@ class MyCar2Coordinator(DataUpdateCoordinator):
         self.vehicle_info = vehicle_info
         self._signalr_task: asyncio.Task | None = None
         self._keyfob_task: asyncio.Task | None = None
+        self._last_auto_wake: float = 0.0
 
     async def _async_update_data(self) -> dict:
         try:
@@ -57,7 +62,25 @@ class MyCar2Coordinator(DataUpdateCoordinator):
         else:
             position = position_result
 
+        # Auto-wake: if the device reports offline, poke it so it reconnects.
+        if status.get("IsOffline") and (monotonic() - self._last_auto_wake) > _AUTO_WAKE_COOLDOWN:
+            self._last_auto_wake = monotonic()
+            _LOGGER.debug("Device %s is offline, sending auto-wake", self.vehicle_id)
+            self.hass.async_create_background_task(
+                self._send_wake_and_refresh(), f"mycar2_autowake_{self.vehicle_id}"
+            )
+
         return {"status": status, "position": position}
+
+    async def _send_wake_and_refresh(self) -> None:
+        try:
+            await self.api.send_command(self.vehicle_id, CMD_AWAKE)
+            await asyncio.sleep(5)
+            await self.api.send_command(self.vehicle_id, CMD_REFRESH_RS)
+            await asyncio.sleep(3)
+            await self.async_request_refresh()
+        except Exception as err:
+            _LOGGER.debug("Auto-wake sequence failed: %s", err)
 
     def start_background_tasks(self) -> None:
         self._signalr_task = self.hass.async_create_background_task(

@@ -17,6 +17,9 @@ from .entity import MyCar2Entity
 @dataclass(frozen=True, kw_only=True)
 class MyCar2BinarySensorDescription(BinarySensorEntityDescription):
     status_key: str = ""
+    # Set True when the API field meaning is the logical opposite of the HA device class.
+    # e.g. IsOffline=True → CONNECTIVITY should report off (disconnected).
+    invert: bool = False
 
 
 SENSORS: tuple[MyCar2BinarySensorDescription, ...] = (
@@ -53,8 +56,11 @@ SENSORS: tuple[MyCar2BinarySensorDescription, ...] = (
     MyCar2BinarySensorDescription(
         key="offline",
         translation_key="offline",
+        # CONNECTIVITY: on=Connected, off=Disconnected.
+        # IsOffline=True means the device is offline → invert so is_on=False → "Disconnected".
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         status_key="IsOffline",
+        invert=True,
     ),
 )
 
@@ -78,8 +84,10 @@ class MyCar2BinarySensor(MyCar2Entity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool | None:
+        if not self.coordinator.data:
+            return None
         raw = self.coordinator.data.get("status", {}).get(self.entity_description.status_key)
         if raw is None:
             return None
-        # IsOffline: invert for connectivity (True = offline → sensor is_on means "offline")
-        return bool(raw)
+        value = bool(raw)
+        return (not value) if self.entity_description.invert else value
