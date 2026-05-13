@@ -1,257 +1,257 @@
 # MyCar2 — Home Assistant Integration
 
-Intégration Home Assistant pour le tracker OBD-II **MyCar2** (Automobility).  
-Contrôlez et surveillez votre véhicule en temps réel depuis HA.
+Home Assistant integration for the **MyCar2** OBD-II tracker (Automobility).  
+Monitor and control your vehicle in real time from Home Assistant.
 
 ---
 
-## Fonctionnalités
+## Features
 
-- **Temps réel** via SignalR (SSE) — les changements d'état apparaissent instantanément
-- **Polling REST** toutes les 30 secondes en fallback
-- **Synchronisation keyfob** automatique toutes les 5 minutes
-- **Démarrage / arrêt distant**, verrouillage, coffre, panic, mode voiturier
-- **GPS** avec altitude, cap et vitesse
-- **Batterie** en volts, température habitacle, force du signal
-- **Multi-véhicules** — une entrée de configuration par véhicule
+- **Real-time updates** via SignalR (SSE) — state changes appear instantly
+- **REST polling** every 30 seconds as a fallback
+- **Automatic keyfob sync** every 5 minutes
+- **Remote start / stop**, door lock, trunk release, panic, valet mode
+- **GPS tracking** with altitude, heading, and speed
+- **Battery voltage**, interior temperature, signal strength
+- **Multi-vehicle** — one config entry per vehicle
 
 ---
 
 ## Installation via HACS
 
-1. Dans HACS, ouvrez **Intégrations** → menu ⋮ → **Dépôts personnalisés**
-2. Ajoutez l'URL du dépôt et choisissez la catégorie **Intégration**
-3. Recherchez **MyCar2** et cliquez **Télécharger**
-4. Redémarrez Home Assistant
+1. In HACS, open **Integrations** → ⋮ menu → **Custom repositories**
+2. Add the repository URL and select the **Integration** category
+3. Search for **MyCar2** and click **Download**
+4. Restart Home Assistant
 
-### Installation manuelle
+### Manual installation
 
-Copiez le dossier `custom_components/mycar2/` dans votre répertoire `config/custom_components/`, puis redémarrez.
+Copy the `custom_components/mycar2/` folder into your `config/custom_components/` directory, then restart Home Assistant.
 
 ---
 
 ## Configuration
 
-1. Allez dans **Paramètres → Appareils et services → Ajouter une intégration**
-2. Recherchez **MyCar2**
-3. Entrez votre **courriel** et **mot de passe** MyCar2
-4. Si vous avez plusieurs véhicules, sélectionnez celui à connecter
-5. L'appareil et toutes ses entités apparaissent immédiatement
+1. Go to **Settings → Devices & Services → Add Integration**
+2. Search for **MyCar2**
+3. Enter your MyCar2 **email** and **password**
+4. If you have multiple vehicles, select the one to connect
+5. The device and all its entities appear immediately
 
-> Les identifiants sont stockés dans HA de façon chiffrée. Ne les entrez jamais dans un fichier de configuration YAML.
+> Credentials are stored encrypted by Home Assistant. Never put them in a YAML file.
 
 ---
 
-## Entités
+## Entities
 
-### Verrou
+### Lock
 
-| Entité | Description |
+| Entity | Description |
 |---|---|
-| `lock.{nom}_portes` | Verrouillage / déverrouillage des portes |
+| `lock.{name}_doors` | Lock / unlock the doors |
 
-**Actions disponibles :** `lock.lock`, `lock.unlock`
+**Available actions:** `lock.lock`, `lock.unlock`
 
 ```yaml
-# Exemple d'automatisation — verrouiller en quittant
+# Example — lock when leaving home
 automation:
   trigger:
     - platform: state
-      entity_id: person.vous
+      entity_id: person.you
       to: not_home
   action:
     - action: lock.lock
       target:
-        entity_id: lock.ma_voiture_portes
+        entity_id: lock.my_car_doors
 ```
 
 ---
 
-### Capteurs binaires
+### Binary Sensors
 
-| Entité | Classe | Description |
+| Entity | Device class | Description |
 |---|---|---|
-| `binary_sensor.{nom}_moteur` | `running` | Moteur allumé (démarrage distant actif) |
-| `binary_sensor.{nom}_contact` | `power` | Contact / allumage |
-| `binary_sensor.{nom}_coffre` | `opening` | Coffre ouvert |
-| `binary_sensor.{nom}_capot` | `opening` | Capot ouvert |
-| `binary_sensor.{nom}_portes` | `door` | Au moins une porte ouverte |
-| `binary_sensor.{nom}_hors_ligne` | `connectivity` | Appareil hors ligne |
+| `binary_sensor.{name}_engine` | `running` | Engine running (remote start active) |
+| `binary_sensor.{name}_ignition` | `power` | Ignition on |
+| `binary_sensor.{name}_trunk` | `opening` | Trunk open |
+| `binary_sensor.{name}_hood` | `opening` | Hood open |
+| `binary_sensor.{name}_doors` | `door` | At least one door open |
+| `binary_sensor.{name}_offline` | `connectivity` | Device offline |
 
 ---
 
-### Capteurs
+### Sensors
 
-| Entité | Unité | Description |
+| Entity | Unit | Description |
 |---|---|---|
-| `sensor.{nom}_batterie` | V | Tension de la batterie du véhicule |
-| `sensor.{nom}_vitesse_gps` | km/h | Vitesse GPS instantanée |
-| `sensor.{nom}_signal` | dBm | Force du signal cellulaire (RSSI) |
-| `sensor.{nom}_temperature_habitacle` | °C | Température intérieure |
-| `sensor.{nom}_version_firmware` | — | Version du firmware du module *(désactivé par défaut)* |
+| `sensor.{name}_battery` | V | Vehicle battery voltage |
+| `sensor.{name}_gps_speed` | km/h | Instantaneous GPS speed |
+| `sensor.{name}_signal` | dBm | Cellular signal strength (RSSI) |
+| `sensor.{name}_interior_temperature` | °C | Interior temperature |
+| `sensor.{name}_firmware_version` | — | Module firmware version *(disabled by default)* |
 
 ---
 
-### Boutons
+### Buttons
 
-| Entité | CarCommand | Description |
+| Entity | CarCommand | Description |
 |---|---|---|
-| `button.{nom}_demarrage_distant` | 3 | Démarrage à distance |
-| `button.{nom}_arret_distant` | 4 | Arrêt à distance |
-| `button.{nom}_prolonger_duree` | 5 | Prolonger le démarrage distant |
-| `button.{nom}_ouvrir_coffre` | 2 | Déverrouiller le coffre |
-| `button.{nom}_panic_on` | 6 | Activer l'alarme panique |
-| `button.{nom}_panic_off` | 7 | Désactiver l'alarme panique |
-| `button.{nom}_mode_voiturier` | 20 | Basculer le mode voiturier |
-| `button.{nom}_synchroniser` | 21 | Forcer une synchro d'état *(désactivé par défaut)* |
+| `button.{name}_remote_start` | 3 | Remote start |
+| `button.{name}_remote_stop` | 4 | Remote stop |
+| `button.{name}_extend_runtime` | 5 | Extend remote start duration |
+| `button.{name}_trunk_release` | 2 | Release the trunk |
+| `button.{name}_panic_on` | 6 | Activate panic alarm |
+| `button.{name}_panic_off` | 7 | Deactivate panic alarm |
+| `button.{name}_valet_mode` | 20 | Toggle valet mode |
+| `button.{name}_sync_status` | 21 | Force a status refresh *(disabled by default)* |
 
-> Les boutons **Démarrage**, **Arrêt** et **Ouvrir coffre** envoient automatiquement une commande de réveil si l'appareil est hors ligne avant d'exécuter l'action.
+> **Remote Start**, **Remote Stop**, and **Trunk Release** automatically send a wake command (`CarCommand 9`) before executing if the device is offline.
 
 ```yaml
-# Exemple — démarrer la voiture 30 min avant de partir le matin
+# Example — start the car 30 minutes before leaving in the morning
 automation:
   trigger:
     - platform: time
       at: "07:30:00"
   condition:
     - condition: state
-      entity_id: binary_sensor.ma_voiture_moteur
+      entity_id: binary_sensor.my_car_engine
       state: "off"
   action:
     - action: button.press
       target:
-        entity_id: button.ma_voiture_demarrage_distant
+        entity_id: button.my_car_remote_start
 ```
 
 ---
 
-### Traceur GPS
+### Device Tracker
 
-| Entité | Description |
+| Entity | Description |
 |---|---|
-| `device_tracker.{nom}_position` | Position GPS du véhicule |
+| `device_tracker.{name}_location` | Vehicle GPS position |
 
-L'entité retourne l'état `home` / `not_home` ou le nom d'une **zone HA** si le véhicule s'y trouve.
+Returns `home` / `not_home` or the name of a **HA zone** if the vehicle is within one.
 
-**Attributs supplémentaires :**
+**Extra attributes:**
 
-| Attribut | Description |
+| Attribute | Description |
 |---|---|
-| `altitude` | Altitude en mètres |
-| `heading` | Cap en degrés (0–360) |
-| `speed` | Vitesse en km/h |
+| `altitude` | Altitude in metres |
+| `heading` | Bearing in degrees (0–360) |
+| `speed` | Speed in km/h |
 
 ```yaml
-# Exemple — notification quand la voiture arrive à la maison
+# Example — notify when the car arrives home
 automation:
   trigger:
     - platform: state
-      entity_id: device_tracker.ma_voiture_position
+      entity_id: device_tracker.my_car_location
       to: home
   action:
     - action: notify.mobile_app
       data:
-        message: "La voiture est arrivée !"
+        message: "The car has arrived home!"
 ```
 
 ---
 
-## Exposer les entités
+## Exposing Entities
 
 ### Google Assistant / Alexa
 
-1. **Paramètres → Appareils et services → Google Assistant** (ou Alexa)
-2. Sélectionnez les entités à exposer  
-3. Le verrou (`lock`) et le traceur (`device_tracker`) sont les plus utiles
+1. Go to **Settings → Devices & Services → Google Assistant** (or Alexa)
+2. Select the entities you want to expose
+3. The lock (`lock`) and tracker (`device_tracker`) are the most useful
 
-> Pour des raisons de sécurité, **ne pas exposer** les boutons de démarrage distant aux assistants vocaux sans protection par code PIN.
+> For security, **do not expose** remote start buttons to voice assistants without a PIN code confirmation.
 
-### Dashboard Lovelace
+### Lovelace Dashboard
 
-Carte minimale pour le contrôle du véhicule :
+A ready-to-paste control card:
 
 ```yaml
 type: vertical-stack
 cards:
   - type: entity
-    entity: lock.ma_voiture_portes
-    name: Verrouillage
+    entity: lock.my_car_doors
+    name: Door Lock
 
   - type: glance
     entities:
-      - entity: binary_sensor.ma_voiture_moteur
-        name: Moteur
-      - entity: binary_sensor.ma_voiture_contact
-        name: Contact
-      - entity: binary_sensor.ma_voiture_coffre
-        name: Coffre
-      - entity: binary_sensor.ma_voiture_capot
-        name: Capot
-      - entity: sensor.ma_voiture_batterie
-        name: Batterie
-      - entity: sensor.ma_voiture_signal
+      - entity: binary_sensor.my_car_engine
+        name: Engine
+      - entity: binary_sensor.my_car_ignition
+        name: Ignition
+      - entity: binary_sensor.my_car_trunk
+        name: Trunk
+      - entity: binary_sensor.my_car_hood
+        name: Hood
+      - entity: sensor.my_car_battery
+        name: Battery
+      - entity: sensor.my_car_signal
         name: Signal
 
   - type: map
     entities:
-      - entity: device_tracker.ma_voiture_position
+      - entity: device_tracker.my_car_location
     hours_to_show: 1
 
   - type: horizontal-stack
     cards:
       - type: button
-        entity: button.ma_voiture_demarrage_distant
-        name: Démarrer
+        entity: button.my_car_remote_start
+        name: Start
         icon: mdi:car-key
       - type: button
-        entity: button.ma_voiture_arret_distant
-        name: Arrêter
+        entity: button.my_car_remote_stop
+        name: Stop
         icon: mdi:car-off
       - type: button
-        entity: button.ma_voiture_ouvrir_coffre
-        name: Coffre
+        entity: button.my_car_trunk_release
+        name: Trunk
         icon: mdi:car-back
 ```
 
 ---
 
-## Comportement technique
+## How It Works
 
-| Mécanisme | Détail |
+| Mechanism | Detail |
 |---|---|
-| **Auth** | AWS Cognito `USER_PASSWORD_AUTH` — token rafraîchi automatiquement toutes les 55 min |
-| **Temps réel** | SignalR sur SSE — reconnexion automatique avec recul de 15 s |
-| **Fallback** | Polling REST `GetLastVehicleStatus` + `GetLastVehiclePosition` toutes les 30 s |
-| **Keyfob sync** | `CarCommand 21` envoyé toutes les 5 min pour détecter les changements locaux |
-| **Réveil** | `CarCommand 9` envoyé automatiquement avant toute commande si `IsOffline = true` |
+| **Authentication** | AWS Cognito `USER_PASSWORD_AUTH` — token refreshed automatically every 55 min |
+| **Real-time** | SignalR over SSE — automatic reconnection with 15 s back-off |
+| **Fallback** | REST polling `GetLastVehicleStatus` + `GetLastVehiclePosition` every 30 s |
+| **Keyfob sync** | `CarCommand 21` sent every 5 min to detect local state changes |
+| **Wake on command** | `CarCommand 9` sent automatically before any action when `IsOffline = true` |
 
 ---
 
-## Dépannage
+## Troubleshooting
 
-**L'intégration ne se connecte pas**  
-→ Vérifiez votre courriel et mot de passe dans l'application MyCar2 officielle.
+**Integration fails to connect**  
+→ Check your email and password in the official MyCar2 app first.
 
-**Les entités ne se mettent pas à jour**  
-→ Le device est peut-être hors ligne (`binary_sensor.{nom}_hors_ligne = on`). Appuyez sur **Synchroniser** pour le réveiller.
+**Entities are not updating**  
+→ The device may be offline (`binary_sensor.{name}_offline = on`). Press **Sync Status** to wake it.
 
-**La position GPS est incorrecte ou absente**  
-→ Normal si le véhicule est dans un parking souterrain. La position reprend dès que le signal GPS est disponible.
+**GPS position is missing or stale**  
+→ Expected in underground parking. Position resumes once GPS signal is restored.
 
-**Erreur après une mise à jour de HA**  
-→ Supprimez l'intégration, redémarrez HA, et reconfigurez-la.
+**Error after a HA update**  
+→ Delete the integration, restart HA, and re-add it.
 
 ---
 
-## Versions minimales
+## Requirements
 
-| Logiciel | Version |
+| Software | Minimum version |
 |---|---|
 | Home Assistant | 2024.1.0 |
 | HACS | 1.34.0 |
 
 ---
 
-## Licence
+## License
 
 MIT
