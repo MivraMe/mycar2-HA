@@ -1,0 +1,13 @@
+{
+  "domain": "mycar2",
+  "name": "MyCar2",
+  "version": "1.0.0",
+  "documentation": "https://github.com/mivrame/mycar2-ha",
+  "issue_tracker": "https://github.com/mivrame/mycar2-ha/issues",
+  "codeowners": ["@mivrame"],
+  "requirements": [],
+  "dependencies": [],
+  "iot_class": "cloud_push",
+  "config_flow": true,
+  "homeassistant": "2024.1.0"
+}
