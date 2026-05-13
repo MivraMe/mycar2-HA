@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify manifest version matches tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION=$(jq -r '.version' custom_components/mycar2/manifest.json)
+          if [ "$TAG" != "$MANIFEST_VERSION" ]; then
+            echo "ERROR: tag $GITHUB_REF_NAME does not match manifest version $MANIFEST_VERSION"
+            exit 1
+          fi
+          echo "Version check passed: $MANIFEST_VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          make_latest: true
